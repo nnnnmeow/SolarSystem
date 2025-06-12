@@ -5,8 +5,7 @@
 #include <cmath>
 #include "Planet.h"
 #include "Shader.h"
-#include <fstream>
-#include <sstream>
+#include "Mesh.h"
 #include <vector>
 #include <glm.hpp>
 #include <gtc/matrix_transform.hpp>

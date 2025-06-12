@@ -1,5 +1,10 @@
 #pragma once
 #include <vector>
+#include <glm.hpp>
+#include <gtc/matrix_transform.hpp>
+#include <gtc/type_ptr.hpp>
+#include <gtc/matrix_transform.hpp>
+#define PI 3.14159265358979323846
 
 class Planet {
 public:
@@ -18,15 +23,40 @@ public:
 	std::vector<double> Position{ 0.0, 0.0 };
 
     void DrawPlanet() {
-        glBegin(GL_TRIANGLE_FAN);
-        glVertex2d(Position[0], Position[1]);
-        for (int i = 0; i <= 20; i++) {
-            float twicePi = 2.0 * 3.142 * (static_cast<float>(i) / 20);
-            float x = Position[0] + cos(twicePi) * radius;
-            float y = Position[1] + sin(twicePi) * radius;
-            glVertex2d(x, y);
+		glBegin(GL_TRIANGLES);
+        std::vector<float> vertices;
+        std::vector<int> indices;
+        int sectorCount = 36;
+        int stackCount = 18;
+        float radius = 1.0f;
+
+        for (int i = 0; i <= stackCount; ++i) {
+            float stackAngle = PI / 2 - i * PI / stackCount;
+            float xy = radius * cosf(stackAngle);
+            float z = radius * sinf(stackAngle);
+
+            for (int j = 0; j <= sectorCount; ++j) {
+                float sectorAngle = j * 2 * PI / sectorCount;
+                float x = xy * cosf(sectorAngle);
+                float y = xy * sinf(sectorAngle);
+                vertices.insert(vertices.end(), { x, y, z });
+            }
         }
-        glEnd();
+
+        for (int i = 0; i < stackCount; ++i) {
+            int k1 = i * (sectorCount + 1);
+            int k2 = k1 + sectorCount + 1;
+
+            for (int j = 0; j < sectorCount; ++j, ++k1, ++k2) {
+                if (i != 0) {
+                    indices.insert(indices.end(), { k1, k2, k1 + 1 });
+                }
+                if (i != (stackCount - 1)) {
+                    indices.insert(indices.end(), { k1 + 1, k2, k2 + 1 });
+                }
+            }
+        }
+		glEnd();
     }
 
 	void UpdatePosition() {

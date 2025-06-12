@@ -32,5 +32,14 @@
     <ClInclude Include="src\Shader.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
+    <ClInclude Include="src\Mesh.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Shaders\Fragment\SunFragment.glsl" />
+    <None Include="Shaders\Vertex\SunVertex.glsl" />
+    <None Include="Shaders\Vertex\SquareVertex.glsl" />
+    <None Include="Shaders\Fragment\SquareFragment.glsl" />
   </ItemGroup>
 </Project>
