@@ -37,8 +37,6 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Shaders\Fragment\SunFragment.glsl" />
-    <None Include="Shaders\Vertex\SunVertex.glsl" />
     <None Include="Shaders\Vertex\SquareVertex.glsl" />
     <None Include="Shaders\Fragment\SquareFragment.glsl" />
   </ItemGroup>

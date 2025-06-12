@@ -3,8 +3,105 @@
 #define WWidth 780
 const double G = 6.6743e-11;
 
+std::vector<Planet> planets{
+    Planet(std::vector<double>{0.0, 0.0}, std::vector<double>{WWidth / 2, WHeight / 2}, 50.0f, 7.35 * pow(10, 22)),
+    Planet(std::vector<double>{0.0, 0.0}, std::vector<double>{(WWidth / 2) + 300, WHeight / 2}, 25.0f, 7.35 * pow(10, 22))
+};
+
+glm::mat4 globalTransform = glm::mat4(1.0f);
+
+std::vector<Shader> shaders;
+
+double LastXPos = 0;
+double LastYPos = 0;
+
+void mouse_cursor_callback(GLFWwindow* window, double XPos, double YPos)
+{
+
+    if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_RELEASE)
+    {
+        LastXPos = XPos;
+        LastYPos = YPos;
+        return;
+    }
+
+    std::cout << XPos << " " << YPos << std::endl;
+
+    double deltaX = XPos - LastXPos;
+    double deltaY = YPos - LastYPos;
+
+    if (LastXPos != XPos && LastYPos != YPos)
+    {
+        if (XPos > LastXPos && YPos > LastYPos)
+        {
+            deltaX = -(XPos - LastXPos);
+            deltaY = -(YPos - LastYPos);
+        }
+        else if (XPos < LastXPos && YPos < LastYPos)
+        {
+            deltaX = LastXPos - XPos;
+            deltaY = LastYPos - YPos;
+        }
+        else if (XPos > LastXPos && YPos < LastYPos)
+        {
+            deltaX = -(XPos - LastXPos);
+            deltaY = LastYPos - YPos;
+        }
+        else if (XPos < LastXPos && YPos > LastYPos)
+        {
+            deltaX = LastXPos - XPos;
+            deltaY = LastYPos - YPos;
+        }
+    }
+    else if (LastXPos != XPos && LastYPos == YPos)
+    {
+        if (XPos > LastXPos)
+        {
+            deltaX = -(XPos - LastXPos);
+            deltaY = 0;
+        }
+        else if (XPos < LastXPos)
+        {
+            deltaX = LastXPos - XPos;
+            deltaY = 0;
+        }
+    }
+    else if (LastXPos == XPos && LastYPos != YPos)
+    {
+        if (YPos > LastYPos)
+        {
+            deltaX = 0;
+            deltaY = -(YPos - LastYPos);
+        }
+        else if (YPos < LastYPos)
+        {
+            deltaX = 0;
+            deltaY = LastYPos - YPos;
+        }
+    }
+
+    if (fabs(deltaX) < 0.001 && fabs(deltaY) < 0.001)
+        return;
+
+    float sensitivity = 0.005f;
+
+    glm::vec3 axis = glm::normalize(glm::vec3((float)deltaY, (float)deltaX, 0.0f));
+    float angle = sqrt(deltaX * deltaX + deltaY * deltaY) * sensitivity;
+
+    globalTransform = glm::rotate(globalTransform, angle, axis);
+
+    for (auto& a : shaders)
+    {
+        a.setMat4("transform", globalTransform);
+    }
+
+    LastXPos = XPos;
+    LastYPos = YPos;
+}
+
 int main(void)
 {
+    
 
     GLFWwindow* window;
 
@@ -23,24 +120,16 @@ int main(void)
 
     gladLoadGL();
 
-    std::vector<Planet> planets{
-        Planet(std::vector<double>{0.0, 0.0}, std::vector<double>{WWidth / 2, WHeight / 2}, 50.0f, 7.35 * pow(10, 22)),
-        Planet(std::vector<double>{0.0, 0.0}, std::vector<double>{(WWidth / 2) + 300, WHeight / 2}, 25.0f, 7.35 * pow(10, 22))
-    };
-    std::vector<Shader> shaders{
-        Shader("Shaders/Vertex/SunVertex.glsl", "Shaders/Fragment/SunFragment.glsl")
-    };
-
 	std::vector<float> CubeVertices = {
         //vertices         
         0.5f,  0.5f, 0.0f,    // top right
         0.5f, -0.5f, 0.0f,    // bottom right
         -0.5f, -0.5f, 0.0f,   // bottom left
         -0.5f,  0.5f, 0.0f,   // top left
-        0.5f, 0.5f, 1.0f,     //back top right
-		0.5f, -0.5f, 1.0f,    //back bottom right
-	    -0.5f, -0.5f, 1.0f,   //back bottom left
-	    -0.5f,  0.5f, 1.0f,   //back top left
+        0.5f, 0.5f, 0.8f,     //back top right
+		0.5f, -0.5f, 0.8f,    //back bottom right
+	    -0.5f, -0.5f, 0.8f,   //back bottom left
+	    -0.5f,  0.5f, 0.8f,   //back top left
         //colors
          0.5f, 0.0f, 0.0f, // top right color
          1.0f, 0.0f, 0.0f, // bottom right color
@@ -67,9 +156,12 @@ int main(void)
 		3, 7, 4    // second triangle top
 	};
 
+    
     Mesh Cube(CubeVertices, CubeIndices);
-	Shader CubeShader("Shaders/Vertex/SquareVertex.glsl", "Shaders/Fragment/SquareFragment.glsl");
+    Shader a("Shaders/Vertex/SquareVertex.glsl", "Shaders/Fragment/SquareFragment.glsl");
+    shaders.push_back(a);
 
+    glfwSetCursorPosCallback(window, mouse_cursor_callback);
 
 while (!glfwWindowShouldClose(window))
     {
@@ -112,18 +204,8 @@ while (!glfwWindowShouldClose(window))
 
             planet.DrawPlanet();
         }*/
-        CubeShader.use();
+        a.use();
         Cube.draw();
-
-        glm::mat4 trans = glm::mat4(1.0f);
-        trans = glm::rotate(trans, (float)glfwGetTime(), glm::vec3(0.2f, 0.0f, 0.2f));
-
-		glm::mat4 view = glm::mat4(1.0f);
-		view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
-
-        unsigned int transformLoc = glGetUniformLocation(CubeShader.getID(), "transform");
-        CubeShader.setMat4("transform", trans);
-		CubeShader.setMat4("view", view);
 
         glfwSwapBuffers(window);
 

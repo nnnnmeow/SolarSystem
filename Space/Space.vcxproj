@@ -146,9 +146,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Shaders\Fragment\SquareFragment.glsl" />
-    <None Include="Shaders\Fragment\SunFragment.glsl" />
     <None Include="Shaders\Vertex\SquareVertex.glsl" />
-    <None Include="Shaders\Vertex\SunVertex.glsl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
