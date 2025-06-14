@@ -4,9 +4,10 @@
 const double G = 6.6743e-11;
 
 std::vector<Planet> planets{
-    Planet(std::vector<double>{0.0, 0.0}, std::vector<double>{WWidth / 2, WHeight / 2}, 50.0f, 7.35 * pow(10, 22)),
-    Planet(std::vector<double>{0.0, 0.0}, std::vector<double>{(WWidth / 2) + 300, WHeight / 2}, 25.0f, 7.35 * pow(10, 22))
+    
 };
+
+Planet ab(std::vector<float>{0.0, 0.0}, std::vector<float>{0.5f, 0.5f}, 1.0f, 5);
 
 glm::mat4 globalTransform = glm::mat4(1.0f);
 
@@ -25,7 +26,7 @@ void mouse_cursor_callback(GLFWwindow* window, double XPos, double YPos)
         return;
     }
 
-    std::cout << XPos << " " << YPos << std::endl;
+    //std::cout << XPos << " " << YPos << std::endl;
 
     double deltaX = XPos - LastXPos;
     double deltaY = YPos - LastYPos;
@@ -120,16 +121,16 @@ int main(void)
 
     gladLoadGL();
 
-	std::vector<float> CubeVertices = {
+	std::vector<float> Cube1Vertices = {
         //vertices         
-        0.5f,  0.5f, 0.0f,    // top right
-        0.5f, -0.5f, 0.0f,    // bottom right
-        -0.5f, -0.5f, 0.0f,   // bottom left
-        -0.5f,  0.5f, 0.0f,   // top left
-        0.5f, 0.5f, 0.8f,     //back top right
-		0.5f, -0.5f, 0.8f,    //back bottom right
-	    -0.5f, -0.5f, 0.8f,   //back bottom left
-	    -0.5f,  0.5f, 0.8f,   //back top left
+        0.3f,  0.3f, 0.0f,    // top right
+        0.3f, -0.3f, 0.0f,    // bottom right
+        -0.3f, -0.3f, 0.0f,   // bottom left
+        -0.3f,  0.3f, 0.0f,   // top left
+        0.3f, 0.3f, 0.5f,     //back top right
+		0.3f, -0.3f, 0.5f,    //back bottom right
+	    -0.3f, -0.3f, 0.5f,   //back bottom left
+	    -0.3f,  0.3f, 0.5f,   //back top left
         //colors
          0.5f, 0.0f, 0.0f, // top right color
          1.0f, 0.0f, 0.0f, // bottom right color
@@ -141,7 +142,7 @@ int main(void)
          1.0f, 1.0f, 0.0f  //back top left color
 	};
 
-    std::vector<unsigned int> CubeIndices = {
+    std::vector<unsigned int> Cube1Indices = {
         0, 1, 3,   // first triangle
         1, 2, 3,   // second triangle
 		4, 5, 7,   // first triangle back
@@ -156,10 +157,12 @@ int main(void)
 		3, 7, 4    // second triangle top
 	};
 
-    
-    Mesh Cube(CubeVertices, CubeIndices);
+    /*Mesh Cube(Cube1Vertices, Cube1Indices);
     Shader a("Shaders/Vertex/SquareVertex.glsl", "Shaders/Fragment/SquareFragment.glsl");
-    shaders.push_back(a);
+    shaders.push_back(a);*/
+
+    Mesh Planet(ab.vertices, ab.indices);
+    Shader PlanetShader("Shaders/Vertex/SquareVertex.glsl", "Shaders/Fragment/SquareFragment.glsl");
 
     glfwSetCursorPosCallback(window, mouse_cursor_callback);
 
@@ -204,8 +207,15 @@ while (!glfwWindowShouldClose(window))
 
             planet.DrawPlanet();
         }*/
-        a.use();
+        /*a.use();
         Cube.draw();
+        */
+
+        ab.CalculateCoords();
+        ab.draw();
+
+        PlanetShader.use();
+        Planet.draw();
 
         glfwSwapBuffers(window);
 
