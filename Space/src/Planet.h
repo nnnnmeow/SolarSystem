@@ -36,21 +36,6 @@ public:
 
     std::vector<unsigned int> lineIndices;
 
-    void draw() {
-        glEnableClientState(GL_VERTEX_ARRAY);
-        glEnableClientState(GL_NORMAL_ARRAY);
-        glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-        glVertexPointer(3, GL_FLOAT, 20, &interleavedVertices[0]);
-        glNormalPointer(GL_FLOAT, 20, &interleavedVertices[3]);
-        glTexCoordPointer(2, GL_FLOAT, 20, &interleavedVertices[6]);
-
-        glDrawElements(GL_TRIANGLES, (unsigned int)indices.size(), GL_UNSIGNED_INT, indices.data());
-
-        glDisableClientState(GL_VERTEX_ARRAY);
-        glDisableClientState(GL_NORMAL_ARRAY);
-        glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-    }
-
     void CalculateCoords() {
         std::vector<float>().swap(vertices);
         std::vector<float>().swap(normals);
@@ -97,13 +82,12 @@ public:
         int k1, k2;
         for (int i = 0; i < stackCount; ++i)
         {
-            k1 = i * (sectorCount + 1);     // beginning of current stack
-            k2 = k1 + sectorCount + 1;      // beginning of next stack
+            k1 = i * (sectorCount + 1);
+            k2 = k1 + sectorCount + 1;
 
             for (int j = 0; j < sectorCount; ++j, ++k1, ++k2)
             {
-                // 2 triangles per sector excluding first and last stacks
-                // k1 => k2 => k1+1
+                
                 if (i != 0)
                 {
                     indices.push_back(k1);
@@ -111,7 +95,7 @@ public:
                     indices.push_back(k1 + 1);
                 }
 
-                // k1+1 => k2 => k2+1
+                
                 if (i != (stackCount - 1))
                 {
                     indices.push_back(k1 + 1);
@@ -119,39 +103,14 @@ public:
                     indices.push_back(k2 + 1);
                 }
 
-                // store indices for lines
-                // vertical lines for all stacks, k1 => k2
                 lineIndices.push_back(k1);
                 lineIndices.push_back(k2);
-                if (i != 0)  // horizontal lines except 1st stack, k1 => k+1
+                if (i != 0)
                 {
                     lineIndices.push_back(k1);
                     lineIndices.push_back(k1 + 1);
                 }
             }
-        }
-
-        buildInterleavedVertices();
-    }
-
-    void buildInterleavedVertices()
-    {
-        std::vector<float>().swap(interleavedVertices);
-
-        std::size_t i, j;
-        std::size_t count = vertices.size();
-        for (i = 0, j = 0; i < count; i += 3, j += 2)
-        {
-            interleavedVertices.push_back(vertices[i]);
-            interleavedVertices.push_back(vertices[i + 1]);
-            interleavedVertices.push_back(vertices[i + 2]);
-
-            interleavedVertices.push_back(normals[i]);
-            interleavedVertices.push_back(normals[i + 1]);
-            interleavedVertices.push_back(normals[i + 2]);
-
-            interleavedVertices.push_back(texCoords[j]);
-            interleavedVertices.push_back(texCoords[j + 1]);
         }
     }
 

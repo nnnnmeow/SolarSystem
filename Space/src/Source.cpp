@@ -7,8 +7,6 @@ std::vector<Planet> planets{
     
 };
 
-Planet ab(std::vector<float>{0.0, 0.0}, std::vector<float>{0.5f, 0.5f}, 1.0f, 5);
-
 glm::mat4 globalTransform = glm::mat4(1.0f);
 
 std::vector<Shader> shaders;
@@ -121,55 +119,33 @@ int main(void)
 
     gladLoadGL();
 
-	std::vector<float> Cube1Vertices = {
-        //vertices         
-        0.3f,  0.3f, 0.0f,    // top right
-        0.3f, -0.3f, 0.0f,    // bottom right
-        -0.3f, -0.3f, 0.0f,   // bottom left
-        -0.3f,  0.3f, 0.0f,   // top left
-        0.3f, 0.3f, 0.5f,     //back top right
-		0.3f, -0.3f, 0.5f,    //back bottom right
-	    -0.3f, -0.3f, 0.5f,   //back bottom left
-	    -0.3f,  0.3f, 0.5f,   //back top left
-        //colors
-         0.5f, 0.0f, 0.0f, // top right color
-         1.0f, 0.0f, 0.0f, // bottom right color
-         0.0f, 0.5f, 0.0f, // bottom left color
-         0.0f, 1.0f, 0.0f, // top left color
-         0.0f, 0.0f, 0.5f, //back top right color
-         0.0f, 0.0f, 1.0f, //back bottom right color
-         0.5f, 0.5f, 0.0f, //back bottom left color
-         1.0f, 1.0f, 0.0f  //back top left color
-	};
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    glOrtho(0, WWidth, 0, WHeight, -1, 1);
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
 
-    std::vector<unsigned int> Cube1Indices = {
-        0, 1, 3,   // first triangle
-        1, 2, 3,   // second triangle
-		4, 5, 7,   // first triangle back
-		5, 6, 7,   // second triangle back
-		0, 1, 4,   // first triangle right
-		1, 5, 4,   // second triangle right
-		1, 2, 5,   // first triangle bottom
-		2, 6, 5,   // second triangle bottom
-		2, 3, 6,   // first triangle left
-		3, 7, 6,   // second triangle left
-		0, 3, 4,   // first triangle top
-		3, 7, 4    // second triangle top
-	};
-
-    /*Mesh Cube(Cube1Vertices, Cube1Indices);
-    Shader a("Shaders/Vertex/SquareVertex.glsl", "Shaders/Fragment/SquareFragment.glsl");
-    shaders.push_back(a);*/
+    Planet ab(std::vector<float>{0.0, 0.0}, std::vector<float>{WWidth / 2, WHeight / 2}, 100.0f, 5);
+    ab.CalculateCoords();
+    /*for (size_t i = 0; i < ab.vertices.size(); i++)
+    {
+        std::cout << "Vertices: " << ab.vertices[i] << std::endl;
+    }
+    for (size_t i = 0; i < ab.indices.size(); i++)
+    {
+        std::cout << "Indices: " << ab.indices[i] << std::endl;
+    }*/
 
     Mesh Planet(ab.vertices, ab.indices);
     Shader PlanetShader("Shaders/Vertex/SquareVertex.glsl", "Shaders/Fragment/SquareFragment.glsl");
+	shaders.push_back(PlanetShader);
 
     glfwSetCursorPosCallback(window, mouse_cursor_callback);
 
 while (!glfwWindowShouldClose(window))
     {
 
-        glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+        glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glEnable(GL_DEPTH_TEST);
 
@@ -207,14 +183,14 @@ while (!glfwWindowShouldClose(window))
 
             planet.DrawPlanet();
         }*/
-        /*a.use();
-        Cube.draw();
-        */
 
-        ab.CalculateCoords();
-        ab.draw();
+        glm::mat4 projection = glm::ortho(0.0f, (float)WWidth, 0.0f, (float)WHeight);
+        glm::mat4 view = glm::mat4(1.0f);
 
         PlanetShader.use();
+        PlanetShader.setMat4("projection", projection);
+        PlanetShader.setMat4("view", view);
+
         Planet.draw();
 
         glfwSwapBuffers(window);

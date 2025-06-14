@@ -35,6 +35,24 @@ public:
 		unsigned int vertexShader = compileShader(GL_VERTEX_SHADER, vertexCode.c_str());
 		unsigned int fragmentShader = compileShader(GL_FRAGMENT_SHADER, fragmentCode.c_str());
 
+		int success;
+		char infoLog[512];
+		glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
+		if (!success)
+		{
+			glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
+			std::cerr << "vertex ERROR::SHADER::COMPILATION_FAILED\n" << infoLog << std::endl;
+		}
+
+		int success2;
+		char infoLog2[512];
+		glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success2);
+		if (!success2)
+		{
+			glGetShaderInfoLog(fragmentShader, 512, NULL, infoLog2);
+			std::cerr << "fragment ERROR::SHADER::COMPILATION_FAILED\n" << infoLog2 << std::endl;
+		}
+
 		ID = glCreateProgram();
 		glAttachShader(ID, vertexShader);
 		glAttachShader(ID, fragmentShader);
@@ -42,6 +60,7 @@ public:
 
 		glDeleteShader(vertexShader);
 		glDeleteShader(fragmentShader);
+
 	}
 
 	unsigned int getID() const {
