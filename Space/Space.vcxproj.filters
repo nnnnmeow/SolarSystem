@@ -35,9 +35,17 @@
     <ClInclude Include="src\Mesh.h">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
+    <ClInclude Include="src\stb_image.h">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Shaders\Vertex\SquareVertex.glsl" />
     <None Include="Shaders\Fragment\SquareFragment.glsl" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="Shaders\Textures\SunTexture.png">
+      <Filter>Файлы ресурсов</Filter>
+    </Image>
   </ItemGroup>
 </Project>

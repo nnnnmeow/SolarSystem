@@ -10,8 +10,8 @@ class Planet {
 public:
     float radius;
     float mass;
-    int sectorCount = 20;
-    int stackCount = 20;
+    int sectorCount = 32;
+    int stackCount = 32;
 
     Planet(std::vector<float> velocity, std::vector<float> position, float radius, float mass) {
 		this->Velocity = velocity;
@@ -26,10 +26,6 @@ public:
 
     std::vector<float> vertices;
 
-    std::vector<float> interleavedVertices;
-
-    std::vector<float> normals;
-
     std::vector<float> texCoords;
 
     std::vector<unsigned int> indices;
@@ -38,11 +34,10 @@ public:
 
     void CalculateCoords() {
         std::vector<float>().swap(vertices);
-        std::vector<float>().swap(normals);
         std::vector<float>().swap(texCoords);
 
         float x, y, z, xy;
-        float nx, ny, nz, lengthInv = 1.0f / radius;
+        float lengthInv = 1.0f / radius;
         float s, t;
 
         float sectorStep = 2 * PI / sectorCount;
@@ -64,13 +59,6 @@ public:
                 vertices.push_back(x);
                 vertices.push_back(y);
                 vertices.push_back(z);
-
-                nx = x * lengthInv;
-                ny = y * lengthInv;
-                nz = z * lengthInv;
-                normals.push_back(nx);
-                normals.push_back(ny);
-                normals.push_back(nz);
 
                 s = (float)j / sectorCount;
                 t = (float)i / stackCount;

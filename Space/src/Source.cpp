@@ -100,8 +100,6 @@ void mouse_cursor_callback(GLFWwindow* window, double XPos, double YPos)
 
 int main(void)
 {
-    
-
     GLFWwindow* window;
 
     if (!glfwInit())
@@ -125,7 +123,7 @@ int main(void)
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
 
-    Planet ab(std::vector<float>{0.0, 0.0}, std::vector<float>{WWidth / 2, WHeight / 2}, 100.0f, 5);
+    Planet ab(std::vector<float>{0.0, 0.0}, std::vector<float>{0.0f, 0.0f}, 0.5f, 5);
     ab.CalculateCoords();
     /*for (size_t i = 0; i < ab.vertices.size(); i++)
     {
@@ -135,9 +133,12 @@ int main(void)
     {
         std::cout << "Indices: " << ab.indices[i] << std::endl;
     }*/
+    std::vector<float> AB;
+    AB.insert(AB.end(), ab.vertices.begin(), ab.vertices.end());
+    AB.insert(AB.end(), ab.texCoords.begin(), ab.texCoords.end());
 
-    Mesh Planet(ab.vertices, ab.indices);
-    Shader PlanetShader("Shaders/Vertex/SquareVertex.glsl", "Shaders/Fragment/SquareFragment.glsl");
+    Mesh Planet(AB, ab.indices);
+    Shader PlanetShader("Shaders/Vertex/SunVertex.glsl", "Shaders/Fragment/SunFragment.glsl", "Shaders/Textures/SunTexture.png");
 	shaders.push_back(PlanetShader);
 
     glfwSetCursorPosCallback(window, mouse_cursor_callback);
@@ -184,12 +185,21 @@ while (!glfwWindowShouldClose(window))
             planet.DrawPlanet();
         }*/
 
-        glm::mat4 projection = glm::ortho(0.0f, (float)WWidth, 0.0f, (float)WHeight);
-        glm::mat4 view = glm::mat4(1.0f);
+        float aspectRatio = (float)WWidth / (float)WHeight;
+
+        glm::mat4 projection = glm::perspective(glm::radians(45.0f), aspectRatio, 0.1f, 100.0f);
+
+        glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 3.0f);
+        glm::vec3 cameraTarget = glm::vec3(0.0f, 0.0f, 0.0f);
+        glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
+
+        glm::mat4 view = glm::lookAt(cameraPos, cameraTarget, cameraUp);
 
         PlanetShader.use();
         PlanetShader.setMat4("projection", projection);
         PlanetShader.setMat4("view", view);
+
+        PlanetShader.setInt("ourTexture", 0);
 
         Planet.draw();
 
