@@ -1,8 +1,7 @@
 #version 330 core
 layout (location = 0) in vec3 aPos;
-layout(location = 1) in vec2 vertexUV;
+layout (location = 1) in vec2 vertexUV;
 
-uniform mat4 transform;
 uniform mat4 projection;
 uniform mat4 view;
 
@@ -10,6 +9,6 @@ out vec2 UV;
 
 void main()
 {
-    gl_Position = projection * view * transform * vec4(aPos, 1.0f);
+    gl_Position = projection * view * vec4(aPos, 1.0f);
     UV = vertexUV;
 }   

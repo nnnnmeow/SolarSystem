@@ -1,13 +1,18 @@
 #include "Config.h"
-#define WHeight 920
-#define WWidth 780
+
 const double G = 6.6743e-11;
+glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 3.0f);
+glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
+glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
+glm::mat4 view;
+float yaw = -90.0f;
+float pitch = 0.0f;
+float fov = 45.0f;
+float deltaTime;
 
 std::vector<Planet> planets{
     
 };
-
-glm::mat4 globalTransform = glm::mat4(1.0f);
 
 std::vector<Shader> shaders;
 
@@ -19,84 +24,103 @@ void mouse_cursor_callback(GLFWwindow* window, double XPos, double YPos)
 
     if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_RELEASE)
     {
-        LastXPos = XPos;
-        LastYPos = YPos;
+		LastXPos = XPos;
+		LastYPos = YPos;
         return;
     }
 
-    //std::cout << XPos << " " << YPos << std::endl;
-
-    double deltaX = XPos - LastXPos;
-    double deltaY = YPos - LastYPos;
-
-    if (LastXPos != XPos && LastYPos != YPos)
-    {
-        if (XPos > LastXPos && YPos > LastYPos)
-        {
-            deltaX = -(XPos - LastXPos);
-            deltaY = -(YPos - LastYPos);
-        }
-        else if (XPos < LastXPos && YPos < LastYPos)
-        {
-            deltaX = LastXPos - XPos;
-            deltaY = LastYPos - YPos;
-        }
-        else if (XPos > LastXPos && YPos < LastYPos)
-        {
-            deltaX = -(XPos - LastXPos);
-            deltaY = LastYPos - YPos;
-        }
-        else if (XPos < LastXPos && YPos > LastYPos)
-        {
-            deltaX = LastXPos - XPos;
-            deltaY = LastYPos - YPos;
-        }
-    }
-    else if (LastXPos != XPos && LastYPos == YPos)
-    {
-        if (XPos > LastXPos)
-        {
-            deltaX = -(XPos - LastXPos);
-            deltaY = 0;
-        }
-        else if (XPos < LastXPos)
-        {
-            deltaX = LastXPos - XPos;
-            deltaY = 0;
-        }
-    }
-    else if (LastXPos == XPos && LastYPos != YPos)
-    {
-        if (YPos > LastYPos)
-        {
-            deltaX = 0;
-            deltaY = -(YPos - LastYPos);
-        }
-        else if (YPos < LastYPos)
-        {
-            deltaX = 0;
-            deltaY = LastYPos - YPos;
-        }
-    }
-
-    if (fabs(deltaX) < 0.001 && fabs(deltaY) < 0.001)
-        return;
-
-    float sensitivity = 0.005f;
-
-    glm::vec3 axis = glm::normalize(glm::vec3((float)deltaY, (float)deltaX, 0.0f));
-    float angle = sqrt(deltaX * deltaX + deltaY * deltaY) * sensitivity;
-
-    globalTransform = glm::rotate(globalTransform, angle, axis);
-
-    for (auto& a : shaders)
-    {
-        a.setMat4("transform", globalTransform);
-    }
-
+	float Xoffset = XPos - LastXPos;
+	float Yoffset = LastYPos - YPos;
     LastXPos = XPos;
     LastYPos = YPos;
+
+    float sensitivity = 0.1f;
+    Xoffset *= sensitivity;
+    Yoffset *= sensitivity;
+
+    yaw += Xoffset;
+    pitch += Yoffset;
+
+    if (pitch > 89.0f)
+        pitch = 89.0f;
+    if (pitch < -89.0f)
+        pitch = -89.0f;
+
+    glm::vec3 front;
+    front.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
+    front.y = sin(glm::radians(pitch));
+    front.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+	cameraFront = glm::normalize(front);
+    
+    view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
+    for (auto& a : shaders)
+    {
+        a.setMat4("view", view);
+    }
 }
+
+void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
+{
+
+    float cameraSpeed = 2.5f * deltaTime;
+    switch (key)
+    {
+        case GLFW_KEY_W:
+            cameraPos += cameraSpeed * cameraFront;
+            view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
+            for (auto& a : shaders)
+            {
+                a.setMat4("view", view);
+            }
+            break;
+        case GLFW_KEY_S:
+            cameraPos -= cameraSpeed * cameraFront;
+            view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
+            for (auto& a : shaders)
+            {
+                a.setMat4("view", view);
+            }
+            break;
+        case GLFW_KEY_A:
+            cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
+            view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
+            for (auto& a : shaders)
+            {
+                a.setMat4("view", view);
+            }
+            break;
+        case GLFW_KEY_D:
+            cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
+            view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
+            for (auto& a : shaders)
+            {
+                a.setMat4("view", view);
+            }
+            break;
+        case GLFW_KEY_ESCAPE:
+            glfwSetWindowShouldClose(window, true);
+			break;
+        default:
+            break;
+	}
+}
+
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
+{
+    if (fov >= 1.0f && fov <= 45.0f)
+    {
+        fov -= yoffset;
+	}
+    if (fov <= 1.0f)
+    {
+        fov = 1.0f;
+    }
+    if (fov >= 45.0f)
+    {
+        fov = 45.0f;
+    }
+}
+
 
 int main(void)
 {
@@ -104,6 +128,10 @@ int main(void)
 
     if (!glfwInit())
         return -1;
+
+    GLFWmonitor* primary = glfwGetPrimaryMonitor();
+    int WWidth, WHeight;
+    glfwGetMonitorWorkarea(primary, NULL, NULL, &WWidth, &WHeight);
 
     window = glfwCreateWindow(WWidth, WHeight, "Space", NULL, NULL);
 
@@ -133,19 +161,17 @@ int main(void)
     {
         std::cout << "Indices: " << ab.indices[i] << std::endl;
     }*/
-    std::vector<float> AB;
-    AB.insert(AB.end(), ab.vertices.begin(), ab.vertices.end());
-    AB.insert(AB.end(), ab.texCoords.begin(), ab.texCoords.end());
-
-    Mesh Planet(AB, ab.indices);
-    Shader PlanetShader("Shaders/Vertex/SunVertex.glsl", "Shaders/Fragment/SunFragment.glsl", "Shaders/Textures/SunTexture.png");
+    Mesh Planet(ab.vertices, ab.indices);
+    Shader PlanetShader("Shaders/Vertex/SunVertex.glsl", "Shaders/Fragment/SunFragment.glsl", "Shaders/Textures/EarthTexture.png");
 	shaders.push_back(PlanetShader);
 
     glfwSetCursorPosCallback(window, mouse_cursor_callback);
+    glfwSetKeyCallback(window, key_callback);
+    glfwSetScrollCallback(window, scroll_callback);
+    float lastTime = 0;
 
 while (!glfwWindowShouldClose(window))
     {
-
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glEnable(GL_DEPTH_TEST);
@@ -187,17 +213,10 @@ while (!glfwWindowShouldClose(window))
 
         float aspectRatio = (float)WWidth / (float)WHeight;
 
-        glm::mat4 projection = glm::perspective(glm::radians(45.0f), aspectRatio, 0.1f, 100.0f);
-
-        glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 3.0f);
-        glm::vec3 cameraTarget = glm::vec3(0.0f, 0.0f, 0.0f);
-        glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
-
-        glm::mat4 view = glm::lookAt(cameraPos, cameraTarget, cameraUp);
+        glm::mat4 projection = glm::perspective(glm::radians(fov), aspectRatio, 0.1f, 100.0f);
 
         PlanetShader.use();
         PlanetShader.setMat4("projection", projection);
-        PlanetShader.setMat4("view", view);
 
         PlanetShader.setInt("ourTexture", 0);
 
@@ -205,6 +224,9 @@ while (!glfwWindowShouldClose(window))
 
         glfwSwapBuffers(window);
 
+        float currentTime = glfwGetTime();
+        deltaTime = currentTime - lastTime;
+        lastTime = currentTime;
         glfwPollEvents();
     }
 
