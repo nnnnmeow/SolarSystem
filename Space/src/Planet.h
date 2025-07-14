@@ -19,9 +19,13 @@ public:
 		CalculateCoords();
     }
 
+    glm::mat4 model;
+
     glm::vec3 Velocity{ 0.0, 0.0, 0.0 };
 
     glm::vec3 Position{ 0.0, 0.0, 0.0 };
+
+    std::vector<float> combinedVertices;
 
     std::vector<float> vertices;
 

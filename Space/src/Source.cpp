@@ -5,7 +5,6 @@ glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 3.0f);
 glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
 glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
 
-glm::mat4 model = glm::mat4(1.0f);
 glm::mat4 view;
 glm::mat4 projection;
 
@@ -15,7 +14,9 @@ float fov = 45.0f;
 float deltaTime;
 
 std::vector<Planet> planets{
-    {glm::vec3{0.0f, 0.0f, -0.1f}, 0.5f, 5},
+    {glm::vec3{0.0f, 0.0f, -3.0f}, 0.5f, 5},
+    {glm::vec3{2.0f, 0.0f, -3.0f}, 0.5f, 5},
+
 
 };
 
@@ -138,10 +139,14 @@ int main(void)
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
 
-	Mesh planetMesh(planets[0].vertices, planets[0].indices);
-	meshes.push_back(planetMesh);
-    Shader PlanetShader("Shaders/Vertex/PlanetVertex.glsl", "Shaders/Fragment/PlanetFragment.glsl", "Shaders/Textures/EarthTexture.png");
-	shaders.push_back(PlanetShader);
+	Mesh EarthMesh(planets[1].vertices, planets[1].indices);
+	Mesh SunMesh(planets[0].vertices, planets[0].indices);
+    meshes.push_back(SunMesh);
+    meshes.push_back(EarthMesh);
+    Shader EarthShader("Shaders/Vertex/PlanetVertex.glsl", "Shaders/Fragment/PlanetFragment.glsl", "Shaders/Textures/EarthTexture.png");
+    Shader SunShader("Shaders/Vertex/PlanetVertex.glsl", "Shaders/Fragment/PlanetFragment.glsl", "Shaders/Textures/SunTexture.png");
+	shaders.push_back(SunShader);
+    shaders.push_back(EarthShader);
 
     glfwSetCursorPosCallback(window, mouse_cursor_callback);
     glfwSetKeyCallback(window, key_callback);
@@ -156,40 +161,38 @@ while (!glfwWindowShouldClose(window))
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glEnable(GL_DEPTH_TEST);
 
-        /*for (auto& planet : planets)
-        {
-            for (auto& other : planets)
-            {
-                if (&planet == &other) continue;
+    //    for (auto& planet : planets)
+    //    {
+    //        for (auto& other : planets)
+    //        {
+    //            if (&planet == &other) continue;
 
-                float distance = sqrt(pow(planet.Position[0] - other.Position[0], 2) + (planet.Position[1] - other.Position[1], 2));
+    //            float distance = sqrt(pow(planet.Position[0] - other.Position[0], 2) + (planet.Position[1] - other.Position[1], 2));
 
-                std::vector<double> direction = { other.Position[0] / distance, other.Position[1] / distance};
-                distance *= 1000;
+    //            std::vector<double> direction = { other.Position[0] / distance, other.Position[1] / distance};
+    //            distance *= 1000;
 
-                double Gforce = (G * planet.mass * other.mass) / (distance * distance);
-                float acceleration = Gforce / planet.mass;
+    //            double Gforce = (G * planet.mass * other.mass) / (distance * distance);
+    //            float acceleration = Gforce / planet.mass;
 
-                std::vector<double> acc = { direction[0] * acceleration, direction[1] * acceleration};
+    //            std::vector<double> acc = { direction[0] * acceleration, direction[1] * acceleration};
 
-				//planet.UpdateVelocity(acc[0] / 96, acc[1] / 96, '+');
+				////planet.UpdateVelocity(acc[0] / 96, acc[1] / 96, '+');
 
-                if (planet.Position[1] < 0 || planet.Position[1] > WHeight)
-                {
-                    planet.UpdateVelocity(0.0f, -0.95f, '*');
-                }
-                if (planet.Position[0] < 0 || planet.Position[0] > WWidth)
-                {
-                    planet.UpdateVelocity(-0.95f, 0.0f, '*');
-                }
-            }
+    //            if (planet.Position[1] < 0 || planet.Position[1] > WHeight)
+    //            {
+    //                planet.UpdateVelocity(0.0f, -0.95f, 0.0f, '*');
+    //            }
+    //            if (planet.Position[0] < 0 || planet.Position[0] > WWidth)
+    //            {
+    //                planet.UpdateVelocity(-0.95f, 0.0f, 0.0f, '*');
+    //            }
+    //        }
 
-            planet.UpdatePosition();
+    //        planet.UpdatePosition();
 
-			shaders[0].use();
-
-            planet.DrawPlanet();
-        }*/
+    //        model = glm::translate(model, planet.Position);
+    //    }
 
         float aspectRatio = (float)WWidth / (float)WHeight;
 
@@ -197,22 +200,20 @@ while (!glfwWindowShouldClose(window))
 
         for (auto& planet : planets)
         {
-            model = glm::translate(model, planet.Position);
-        }
-
-        for (auto& shader : shaders)
-        {
-            shader.use();
-            shader.setMat4("model", model);
-			shader.setMat4("view", view);
-			shader.setMat4("projection", projection);
-            shader.setInt("ourTexture", 0);
+			planet.model = glm::mat4(1.0f);
+            planet.model = glm::translate(planet.model, planet.Position);
 		}
 
-        for (auto& mesh : meshes)
+        for (int i = 0; i < planets.size(); i++)
         {
-            mesh.draw();
-        }
+            std::cout << "planet " << i << "\n";
+            shaders[i].use();
+            shaders[i].setMat4("model", planets[i].model);
+            shaders[i].setMat4("view", view);
+            shaders[i].setMat4("projection", projection);
+            shaders[i].setInt("ourTexture", 0);
+            meshes[i].draw();
+		}
 
         glfwSwapBuffers(window);
 
