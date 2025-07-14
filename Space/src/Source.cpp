@@ -4,15 +4,22 @@ const double G = 6.6743e-11;
 glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 3.0f);
 glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
 glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
+
+glm::mat4 model = glm::mat4(1.0f);
 glm::mat4 view;
+glm::mat4 projection;
+
 float yaw = -90.0f;
 float pitch = 0.0f;
 float fov = 45.0f;
 float deltaTime;
 
 std::vector<Planet> planets{
-    
+    {glm::vec3{0.0f, 0.0f, -0.1f}, 0.5f, 5},
+
 };
+
+std::vector<Mesh> meshes;
 
 std::vector<Shader> shaders;
 
@@ -53,10 +60,6 @@ void mouse_cursor_callback(GLFWwindow* window, double XPos, double YPos)
 	cameraFront = glm::normalize(front);
     
     view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
-    for (auto& a : shaders)
-    {
-        a.setMat4("view", view);
-    }
 }
 
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
@@ -68,34 +71,18 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
         case GLFW_KEY_W:
             cameraPos += cameraSpeed * cameraFront;
             view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
-            for (auto& a : shaders)
-            {
-                a.setMat4("view", view);
-            }
             break;
         case GLFW_KEY_S:
             cameraPos -= cameraSpeed * cameraFront;
             view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
-            for (auto& a : shaders)
-            {
-                a.setMat4("view", view);
-            }
             break;
         case GLFW_KEY_A:
             cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
             view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
-            for (auto& a : shaders)
-            {
-                a.setMat4("view", view);
-            }
             break;
         case GLFW_KEY_D:
             cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
             view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
-            for (auto& a : shaders)
-            {
-                a.setMat4("view", view);
-            }
             break;
         case GLFW_KEY_ESCAPE:
             glfwSetWindowShouldClose(window, true);
@@ -151,23 +138,16 @@ int main(void)
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
 
-    Planet ab(std::vector<float>{0.0, 0.0}, std::vector<float>{0.0f, 0.0f}, 0.5f, 5);
-    ab.CalculateCoords();
-    /*for (size_t i = 0; i < ab.vertices.size(); i++)
-    {
-        std::cout << "Vertices: " << ab.vertices[i] << std::endl;
-    }
-    for (size_t i = 0; i < ab.indices.size(); i++)
-    {
-        std::cout << "Indices: " << ab.indices[i] << std::endl;
-    }*/
-    Mesh Planet(ab.vertices, ab.indices);
-    Shader PlanetShader("Shaders/Vertex/SunVertex.glsl", "Shaders/Fragment/SunFragment.glsl", "Shaders/Textures/EarthTexture.png");
+	Mesh planetMesh(planets[0].vertices, planets[0].indices);
+	meshes.push_back(planetMesh);
+    Shader PlanetShader("Shaders/Vertex/PlanetVertex.glsl", "Shaders/Fragment/PlanetFragment.glsl", "Shaders/Textures/EarthTexture.png");
 	shaders.push_back(PlanetShader);
 
     glfwSetCursorPosCallback(window, mouse_cursor_callback);
     glfwSetKeyCallback(window, key_callback);
     glfwSetScrollCallback(window, scroll_callback);
+   // glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+
     float lastTime = 0;
 
 while (!glfwWindowShouldClose(window))
@@ -213,14 +193,26 @@ while (!glfwWindowShouldClose(window))
 
         float aspectRatio = (float)WWidth / (float)WHeight;
 
-        glm::mat4 projection = glm::perspective(glm::radians(fov), aspectRatio, 0.1f, 100.0f);
+        projection = glm::perspective(glm::radians(fov), aspectRatio, 0.1f, 100.0f);
 
-        PlanetShader.use();
-        PlanetShader.setMat4("projection", projection);
+        for (auto& planet : planets)
+        {
+            model = glm::translate(model, planet.Position);
+        }
 
-        PlanetShader.setInt("ourTexture", 0);
+        for (auto& shader : shaders)
+        {
+            shader.use();
+            shader.setMat4("model", model);
+			shader.setMat4("view", view);
+			shader.setMat4("projection", projection);
+            shader.setInt("ourTexture", 0);
+		}
 
-        Planet.draw();
+        for (auto& mesh : meshes)
+        {
+            mesh.draw();
+        }
 
         glfwSwapBuffers(window);
 

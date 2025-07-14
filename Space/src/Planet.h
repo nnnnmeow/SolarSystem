@@ -3,7 +3,6 @@
 #include <glm.hpp>
 #include <gtc/matrix_transform.hpp>
 #include <gtc/type_ptr.hpp>
-#include <gtc/matrix_transform.hpp>
 #define PI 3.14159265358979323846
 
 class Planet {
@@ -13,16 +12,16 @@ public:
     int sectorCount = 32;
     int stackCount = 32;
 
-    Planet(std::vector<float> velocity, std::vector<float> position, float radius, float mass) {
-		this->Velocity = velocity;
+    Planet(glm::vec3 position, float radius, float mass) {
 		this->Position = position;
 		this->radius = radius;
         this->mass = mass;
+		CalculateCoords();
     }
 
-    std::vector<float> Velocity{ 0.0, 0.0 };
+    glm::vec3 Velocity{ 0.0, 0.0, 0.0 };
 
-	std::vector<float> Position{ 0.0, 0.0 };
+    glm::vec3 Position{ 0.0, 0.0, 0.0 };
 
     std::vector<float> vertices;
 
@@ -105,29 +104,36 @@ public:
 	void UpdatePosition() {
 		Position[0] += this->Velocity[0];
         Position[1] += this->Velocity[1];
+		Position[2] += this->Velocity[2];
 	}
 
-    void UpdateVelocity(float velX, float velY, char ch) {
+    void UpdateVelocity(float velX, float velY, float velZ, char ch) {
         switch (ch)
         {
         case '+':
             Velocity[0] += velX;
 			Velocity[1] += velY;
+            Velocity[2] += velZ;
 			break;
         case '*':
             Velocity[0] *= velX;
             Velocity[1] *= velY;
+			Velocity[2] *= velZ;
+            break;
         }
        
     }
 
-	float CheckCollision(Planet& other) {
-		if (this == &other) return 1.0f;
+    float CheckCollision(const Planet& other) {
+        float dx = other.Position[0] - this->Position[0];
+        float dy = other.Position[1] - this->Position[1];
+        float dz = other.Position[2] - this->Position[2];
 
-        float distance = sqrt(pow(Position[0] - other.Position[0], 2) + (Position[1] - other.Position[1], 2));
-		if (distance < radius + other.radius) {
-			return -0.2f;
-		}
-		return 1.0f;
-	}
+        float distance = std::pow(dx * dx + dy * dy + dz * dz, (1.0f / 2.0f));
+
+        if (other.radius + this->radius > distance) {
+            return -0.2f;
+        }
+        return 1.0f;
+    }
 };
