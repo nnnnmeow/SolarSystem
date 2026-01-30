@@ -5,7 +5,7 @@ glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 3.0f);
 glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
 glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
 
-glm::mat4 view;
+glm::mat4 view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
 glm::mat4 projection;
 
 float yaw = -90.0f;
@@ -63,7 +63,7 @@ void mouse_cursor_callback(GLFWwindow* window, double XPos, double YPos)
     view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
 }
 
-void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
+/*void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
 
     float cameraSpeed = 2.5f * deltaTime;
@@ -91,7 +91,7 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
         default:
             break;
 	}
-}
+}*/
 
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 {
@@ -139,17 +139,17 @@ int main(void)
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
 
-	Mesh EarthMesh(planets[1].vertices, planets[1].indices);
-	Mesh SunMesh(planets[0].vertices, planets[0].indices);
-    meshes.push_back(SunMesh);
-    meshes.push_back(EarthMesh);
+	Mesh EarthMesh(planets[1].combinedVertices, planets[1].indices);
+	Mesh SunMesh(planets[0].combinedVertices, planets[0].indices);
+    meshes.push_back(std::move(SunMesh));
+    meshes.push_back(std::move(EarthMesh));
+
     Shader EarthShader("Shaders/Vertex/PlanetVertex.glsl", "Shaders/Fragment/PlanetFragment.glsl", "Shaders/Textures/EarthTexture.png");
     Shader SunShader("Shaders/Vertex/PlanetVertex.glsl", "Shaders/Fragment/PlanetFragment.glsl", "Shaders/Textures/SunTexture.png");
-	shaders.push_back(SunShader);
-    shaders.push_back(EarthShader);
-
+    shaders.push_back(std::move(SunShader));
+    shaders.push_back(std::move(EarthShader));
     glfwSetCursorPosCallback(window, mouse_cursor_callback);
-    glfwSetKeyCallback(window, key_callback);
+    //glfwSetKeyCallback(window, key_callback);
     glfwSetScrollCallback(window, scroll_callback);
    // glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
@@ -160,6 +160,27 @@ while (!glfwWindowShouldClose(window))
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glEnable(GL_DEPTH_TEST);
+
+    float cameraSpeed = 2.5f * deltaTime;
+    if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
+        cameraPos += cameraSpeed * cameraFront;
+        view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
+    }
+    if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
+        cameraPos -= cameraSpeed * cameraFront;
+        view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
+    }
+    if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
+        cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
+        view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
+    }
+    if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
+        cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
+        view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
+    }
+    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+            glfwSetWindowShouldClose(window, true);
+
 
     //    for (auto& planet : planets)
     //    {

@@ -3,13 +3,15 @@
 #include <sstream>
 #include <string>
 #include <iostream>
-#include <Windows.h>
-#include <gl/GLU.h>
+#include <glad/glad.h>
 #define STB_IMAGE_IMPLEMENTATION  
 #include "stb_image.h"
 
 class Shader {
 public:
+	Shader(const Shader&) = delete;
+	Shader& operator=(const Shader&) = delete;
+
 	Shader(const char* vertexPath, const char* fragmentPath, const char* texturePath) {
 		this->texturePath = texturePath;
 
@@ -82,6 +84,26 @@ public:
 		}
 		std::cout << "Shader ID = " << ID << std::endl;
 	}
+
+	Shader(Shader&& other) noexcept
+      : ID(other.ID), texturePath(other.texturePath), textureID(other.textureID)
+	  {
+	      other.ID = 0;
+	      other.textureID = 0;
+	  }
+
+	Shader& operator=(Shader&& other) noexcept {
+      if (this != &other) {
+          glDeleteProgram(ID);
+          ID = other.ID;
+          texturePath = other.texturePath;
+          textureID = other.textureID;
+          other.ID = 0;
+          other.textureID = 0;
+      }
+      return *this;
+	}
+
 
 	GLuint LoadTextureFromFile()
 	{

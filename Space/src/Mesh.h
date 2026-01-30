@@ -8,6 +8,9 @@ class Mesh {
     size_t indexCount;
     size_t vertexCount;
 public:
+    Mesh(const Mesh&) = delete;
+    Mesh& operator=(const Mesh&) = delete;
+
     Mesh(const std::vector<float>& vertices, const std::vector<unsigned int>& indices = {}, int stride = 3)
         : useEBO(!indices.empty()), indexCount(indices.size()), vertexCount(vertices.size() / stride)
     {
@@ -27,14 +30,43 @@ public:
             glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), indices.data(), GL_STATIC_DRAW);
         }
 
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
         glEnableVertexAttribArray(0);
 
-        glVertexAttribPointer(1, stride, GL_FLOAT, GL_FALSE, stride * sizeof(float), (void*)(3 * sizeof(float)));
+        glVertexAttribPointer(1, stride, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
         glEnableVertexAttribArray(1);
 
         glBindVertexArray(0);
     }
+
+    Mesh(Mesh&& other) noexcept
+          : VAO(other.VAO), VBO(other.VBO), EBO(other.EBO),
+            useEBO(other.useEBO), indexCount(other.indexCount), vertexCount(other.vertexCount)
+      {
+          other.VAO = 0;
+          other.VBO = 0;
+          other.EBO = 0;
+      }
+
+      Mesh& operator=(Mesh&& other) noexcept {
+          if (this != &other) {
+              glDeleteVertexArrays(1, &VAO);
+              glDeleteBuffers(1, &VBO);
+              if (useEBO) glDeleteBuffers(1, &EBO);
+
+              VAO = other.VAO;
+              VBO = other.VBO;
+              EBO = other.EBO;
+              useEBO = other.useEBO;
+              indexCount = other.indexCount;
+              vertexCount = other.vertexCount;
+
+              other.VAO = 0;
+              other.VBO = 0;
+              other.EBO = 0;
+          }
+          return *this;
+      }
 
     void draw() const {
         glBindVertexArray(VAO);
@@ -49,9 +81,8 @@ public:
     }
 
     ~Mesh() {
-        glDeleteVertexArrays(1, &VAO);
-        glDeleteBuffers(1, &VBO);
-        if (useEBO)
-            glDeleteBuffers(1, &EBO);
+        if (VAO) glDeleteVertexArrays(1, &VAO);
+        if (VBO) glDeleteBuffers(1, &VBO);
+        if (useEBO && EBO) glDeleteBuffers(1, &EBO);
     }
 };

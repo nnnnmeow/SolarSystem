@@ -63,10 +63,17 @@ public:
                 vertices.push_back(y);
                 vertices.push_back(z);
 
+                combinedVertices.push_back(x);
+                combinedVertices.push_back(y);
+                combinedVertices.push_back(z);
+
                 s = (float)j / sectorCount;
                 t = (float)i / stackCount;
                 texCoords.push_back(s);
                 texCoords.push_back(t);
+
+                combinedVertices.push_back(s);
+                combinedVertices.push_back(t);
             }
         }
 
