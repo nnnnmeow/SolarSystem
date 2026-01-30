@@ -1,0 +1,1 @@
+/usr/bin/c++ -Wl,--dependency-file=CMakeFiles/SolarSystem.dir/link.d CMakeFiles/SolarSystem.dir/Space/src/Source.cpp.o CMakeFiles/SolarSystem.dir/Dependencies/glad/src/glad.c.o -o SolarSystem  /usr/lib/libglfw.so.3.4 -ldl /usr/lib/libGLX.so /usr/lib/libOpenGL.so

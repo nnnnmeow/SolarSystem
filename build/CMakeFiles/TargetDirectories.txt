@@ -1,0 +1,3 @@
+/home/nnnnm/CLionProjects/SolarSystem/build/CMakeFiles/SolarSystem.dir
+/home/nnnnm/CLionProjects/SolarSystem/build/CMakeFiles/edit_cache.dir
+/home/nnnnm/CLionProjects/SolarSystem/build/CMakeFiles/rebuild_cache.dir

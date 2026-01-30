@@ -63,36 +63,6 @@ void mouse_cursor_callback(GLFWwindow* window, double XPos, double YPos)
     view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
 }
 
-/*void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
-{
-
-    float cameraSpeed = 2.5f * deltaTime;
-    switch (key)
-    {
-        case GLFW_KEY_W:
-            cameraPos += cameraSpeed * cameraFront;
-            view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
-            break;
-        case GLFW_KEY_S:
-            cameraPos -= cameraSpeed * cameraFront;
-            view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
-            break;
-        case GLFW_KEY_A:
-            cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
-            view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
-            break;
-        case GLFW_KEY_D:
-            cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
-            view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
-            break;
-        case GLFW_KEY_ESCAPE:
-            glfwSetWindowShouldClose(window, true);
-			break;
-        default:
-            break;
-	}
-}*/
-
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 {
     if (fov >= 1.0f && fov <= 45.0f)
@@ -139,19 +109,15 @@ int main(void)
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
 
-	Mesh EarthMesh(planets[1].combinedVertices, planets[1].indices);
-	Mesh SunMesh(planets[0].combinedVertices, planets[0].indices);
-    meshes.push_back(std::move(SunMesh));
-    meshes.push_back(std::move(EarthMesh));
+    meshes.push_back(std::move(Mesh{planets[0].combinedVertices, planets[0].indices})); // Sun
+    meshes.push_back(std::move(Mesh{planets[1].combinedVertices, planets[1].indices})); // Earth
 
-    Shader EarthShader("Shaders/Vertex/PlanetVertex.glsl", "Shaders/Fragment/PlanetFragment.glsl", "Shaders/Textures/EarthTexture.png");
-    Shader SunShader("Shaders/Vertex/PlanetVertex.glsl", "Shaders/Fragment/PlanetFragment.glsl", "Shaders/Textures/SunTexture.png");
-    shaders.push_back(std::move(SunShader));
-    shaders.push_back(std::move(EarthShader));
+    shaders.push_back(std::move(Shader{"Shaders/Vertex/PlanetVertex.glsl", "Shaders/Fragment/PlanetFragment.glsl", "Shaders/Textures/SunTexture.png"})); // Sun
+    shaders.push_back(std::move(Shader{"Shaders/Vertex/PlanetVertex.glsl", "Shaders/Fragment/PlanetFragment.glsl", "Shaders/Textures/EarthTexture.png"})); // Earth
+
     glfwSetCursorPosCallback(window, mouse_cursor_callback);
-    //glfwSetKeyCallback(window, key_callback);
     glfwSetScrollCallback(window, scroll_callback);
-   // glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
     float lastTime = 0;
 
@@ -176,6 +142,14 @@ while (!glfwWindowShouldClose(window))
     }
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
         cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
+        view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
+    }
+    if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS) {
+        cameraPos.y += cameraSpeed;
+        view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
+    }
+    if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS) {
+        cameraPos.y -= cameraSpeed;
         view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
     }
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
@@ -227,7 +201,6 @@ while (!glfwWindowShouldClose(window))
 
         for (int i = 0; i < planets.size(); i++)
         {
-            std::cout << "planet " << i << "\n";
             shaders[i].use();
             shaders[i].setMat4("model", planets[i].model);
             shaders[i].setMat4("view", view);
