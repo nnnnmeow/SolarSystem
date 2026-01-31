@@ -14,8 +14,15 @@ float fov = 45.0f;
 float deltaTime;
 
 std::vector<Planet> planets{
-    {glm::vec3{0.0f, 0.0f, -3.0f}, 0.5f, 5},
-    {glm::vec3{2.0f, 0.0f, -3.0f}, 0.5f, 5},
+    {glm::vec3{0.0f, 0.0f, -3.0f}, 1.0f, 5},
+    {glm::vec3{2.0f, 0.0f, -3.0f}, 0.003503f, 5},
+    {glm::vec3{4.0f, 0.0f, -3.0f}, 0.008690f, 5},
+    {glm::vec3{6.0f, 0.0f, -3.0f}, 0.009149f, 5},
+    {glm::vec3{8.0f, 0.0f, -3.0f}, 0.004867f, 5},
+    {glm::vec3{10.0f, 0.0f, -3.0f}, 0.100397f, 5},
+    {glm::vec3{12.0f, 0.0f, -3.0f}, 0.051963f, 5},
+    {glm::vec3{14.0f, 0.0f, -3.0f}, 0.036421f, 5},
+    {glm::vec3{16.0f, 0.0f, -3.0f}, 0.035359f, 5},
 
 
 };
@@ -110,10 +117,24 @@ int main(void)
     glLoadIdentity();
 
     meshes.push_back(std::move(Mesh{planets[0].combinedVertices, planets[0].indices})); // Sun
-    meshes.push_back(std::move(Mesh{planets[1].combinedVertices, planets[1].indices})); // Earth
+    meshes.push_back(std::move(Mesh{planets[1].combinedVertices, planets[1].indices})); // Mercury
+    meshes.push_back(std::move(Mesh{planets[2].combinedVertices, planets[2].indices})); // Venus
+    meshes.push_back(std::move(Mesh{planets[3].combinedVertices, planets[3].indices})); // Earth
+    meshes.push_back(std::move(Mesh{planets[4].combinedVertices, planets[4].indices})); // Mars
+    meshes.push_back(std::move(Mesh{planets[5].combinedVertices, planets[5].indices})); // Jupiter
+    meshes.push_back(std::move(Mesh{planets[6].combinedVertices, planets[6].indices})); // Saturn
+    meshes.push_back(std::move(Mesh{planets[7].combinedVertices, planets[7].indices})); // Uranus
+    meshes.push_back(std::move(Mesh{planets[8].combinedVertices, planets[8].indices})); // Neptune
 
     shaders.push_back(std::move(Shader{"Shaders/Vertex/PlanetVertex.glsl", "Shaders/Fragment/PlanetFragment.glsl", "Shaders/Textures/SunTexture.png"})); // Sun
+    shaders.push_back(std::move(Shader{"Shaders/Vertex/PlanetVertex.glsl", "Shaders/Fragment/PlanetFragment.glsl", "Shaders/Textures/MercuryTexture.png"})); // Mercury
+    shaders.push_back(std::move(Shader{"Shaders/Vertex/PlanetVertex.glsl", "Shaders/Fragment/PlanetFragment.glsl", "Shaders/Textures/VenusTexture.png"})); // Venus
     shaders.push_back(std::move(Shader{"Shaders/Vertex/PlanetVertex.glsl", "Shaders/Fragment/PlanetFragment.glsl", "Shaders/Textures/EarthTexture.png"})); // Earth
+    shaders.push_back(std::move(Shader{"Shaders/Vertex/PlanetVertex.glsl", "Shaders/Fragment/PlanetFragment.glsl", "Shaders/Textures/MarsTexture.png"})); // Mars
+    shaders.push_back(std::move(Shader{"Shaders/Vertex/PlanetVertex.glsl", "Shaders/Fragment/PlanetFragment.glsl", "Shaders/Textures/JupiterTexture.png"})); // Jupiter
+    shaders.push_back(std::move(Shader{"Shaders/Vertex/PlanetVertex.glsl", "Shaders/Fragment/PlanetFragment.glsl", "Shaders/Textures/SaturnTexture.png"})); // Saturn
+    shaders.push_back(std::move(Shader{"Shaders/Vertex/PlanetVertex.glsl", "Shaders/Fragment/PlanetFragment.glsl", "Shaders/Textures/UranusTexture.png"})); // Uranus
+    shaders.push_back(std::move(Shader{"Shaders/Vertex/PlanetVertex.glsl", "Shaders/Fragment/PlanetFragment.glsl", "Shaders/Textures/NeptuneTexture.png"})); // Neptune
 
     glfwSetCursorPosCallback(window, mouse_cursor_callback);
     glfwSetScrollCallback(window, scroll_callback);
