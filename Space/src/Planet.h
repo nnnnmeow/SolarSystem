@@ -21,6 +21,10 @@ public:
 
     glm::mat4 model;
 
+    float rotationAngle = 0.0f;
+
+    float rotationSpeed = 0.0f;
+
     glm::vec3 Velocity{ 0.0, 0.0, 0.0 };
 
     glm::vec3 Position{ 0.0, 0.0, 0.0 };

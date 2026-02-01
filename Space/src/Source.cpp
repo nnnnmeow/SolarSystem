@@ -143,6 +143,16 @@ int main(void)
         planets[i].Velocity.z = (float)v;
     }
 
+    planets[0].rotationSpeed = 0.2f;
+    planets[1].rotationSpeed = 0.034f;
+    planets[2].rotationSpeed = -0.008f;
+    planets[3].rotationSpeed = 0.5f;
+    planets[4].rotationSpeed = 0.49f;
+    planets[5].rotationSpeed = 1.2f;
+    planets[6].rotationSpeed = 1.12f;
+    planets[7].rotationSpeed = -0.7f;
+    planets[8].rotationSpeed = 0.75f;
+
     glfwSetCursorPosCallback(window, mouse_cursor_callback);
     glfwSetScrollCallback(window, scroll_callback);
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
@@ -151,7 +161,7 @@ int main(void)
 
 while (!glfwWindowShouldClose(window))
     {
-        glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+        glClearColor(0.f, 0.f, 0.f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glEnable(GL_DEPTH_TEST);
 
@@ -212,8 +222,10 @@ while (!glfwWindowShouldClose(window))
 
         for (auto& planet : planets)
         {
+            planet.rotationAngle += planet.rotationSpeed * deltaTime;
             planet.model = glm::mat4(1.0f);
             planet.model = glm::translate(planet.model, planet.Position);
+            planet.model = glm::rotate(planet.model, planet.rotationAngle, glm::vec3(0.0f, 1.0f, 0.0f));
         }
 
         for (int i = 0; i < planets.size(); i++)
