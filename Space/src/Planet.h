@@ -8,11 +8,11 @@
 class Planet {
 public:
     float radius;
-    float mass;
+    double mass;
     int sectorCount = 32;
     int stackCount = 32;
 
-    Planet(glm::vec3 position, float radius, float mass) {
+    Planet(glm::vec3 position, float radius, double mass) {
 		this->Position = position;
 		this->radius = radius;
         this->mass = mass;
@@ -40,7 +40,6 @@ public:
         std::vector<float>().swap(texCoords);
 
         float x, y, z, xy;
-        float lengthInv = 1.0f / radius;
         float s, t;
 
         float sectorStep = 2 * PI / sectorCount;
@@ -51,14 +50,14 @@ public:
         {
             stackAngle = PI / 2 - i * stackStep;
             xy = radius * cosf(stackAngle);
-            z = radius * sinf(stackAngle);
+            y = radius * sinf(stackAngle);
 
             for (int j = 0; j <= sectorCount; ++j)
             {
                 sectorAngle = j * sectorStep;
 
                 x = xy * cosf(sectorAngle);
-                y = xy * sinf(sectorAngle);
+                z = xy * sinf(sectorAngle);
                 vertices.push_back(x);
                 vertices.push_back(y);
                 vertices.push_back(z);
@@ -112,10 +111,15 @@ public:
         }
     }
 
-	void UpdatePosition() {
-		Position[0] += this->Velocity[0];
-        Position[1] += this->Velocity[1];
-		Position[2] += this->Velocity[2];
+    double CalculateDistance(Planet& other) {
+        double distance = sqrt(pow(this->Position[0] - other.Position[0], 2) + pow(this->Position[1] - other.Position[1], 2) + pow(this->Position[2] - other.Position[2], 2));
+        return distance;
+    }
+
+	void UpdatePosition(float dt) {
+		Position[0] += this->Velocity[0] * dt;
+        Position[1] += this->Velocity[1] * dt;
+		Position[2] += this->Velocity[2] * dt;
 	}
 
     void UpdateVelocity(float velX, float velY, float velZ, char ch) {
@@ -135,12 +139,8 @@ public:
        
     }
 
-    float CheckCollision(const Planet& other) {
-        float dx = other.Position[0] - this->Position[0];
-        float dy = other.Position[1] - this->Position[1];
-        float dz = other.Position[2] - this->Position[2];
-
-        float distance = std::pow(dx * dx + dy * dy + dz * dz, (1.0f / 2.0f));
+    double CheckCollision(Planet& other) {
+        double distance = CalculateDistance(other);
 
         if (other.radius + this->radius > distance) {
             return -0.2f;
