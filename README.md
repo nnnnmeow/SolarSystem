@@ -2,9 +2,9 @@
 
 A real-time 3D Solar System visualization and physics simulator built with C++ and OpenGL. Renders the Sun and all eight planets with textured surfaces, realistic orbital mechanics driven by Newtonian gravity, and interactive camera controls.
 
-![OpenGL](https://img.shields.io/badge/OpenGL-3.3+-blue)
-![C++](https://img.shields.io/badge/C++-17-orange)
-![CMake](https://img.shields.io/badge/CMake-3.10+-green)
+<img src="https://img.shields.io/badge/OpenGL-3.3+-blue" alt="OpenGL">                                                                                                                                                                                                             
+<img src="https://img.shields.io/badge/C++-17-orange" alt="C++">                                                                                                                                                                                                                   
+<img src="https://img.shields.io/badge/CMake-3.10+-green" alt="CMake"> 
 
 ## Features
 
